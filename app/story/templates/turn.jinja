@@ -1,0 +1,5 @@
+﻿{{ base_text }}
+
+{% if rag_snippets %}Полезные факты:
+{% for s in rag_snippets %}• {{ s }}
+{% endfor %}{% endif %}

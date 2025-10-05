@@ -1,0 +1,17 @@
+﻿title: 'Chillguy: Stellar Stories'
+buttons:
+  button_1: 'Button 1'
+  button_2: 'Button 2'
+nodes:
+  - id: flare_alert
+    text: |
+      {{name}}, тестовый узел. Здесь будет история.
+    choices:
+      button_1: { next: good_ending }
+      button_2: { next: bad_ending }
+  - id: good_ending
+    ending: good
+    text: 'Good end.'
+  - id: bad_ending
+    ending: bad
+    text: 'Bad end.'
