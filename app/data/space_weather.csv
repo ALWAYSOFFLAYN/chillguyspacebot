@@ -1,1 +1,9 @@
 ﻿id,topic,source,text,tags
+1,solar_flares,GOES,"Soft X-ray flux (1–8 Å) defines classes A,B,C,M,X; each step is ~10× stronger. An M5 event is serious for LEO satellite operations.","satellite,operations,flare"
+2,kp_index,NOAA,"Kp is a global geomagnetic index from 0 to 9. Kp=6 indicates a moderate–strong storm and can degrade HF comms and GNSS accuracy, especially at high latitudes.","kp,storm,gnss"
+3,euv,SDO/GOES,"EUV channels track plasma at different temps: ~171 Å ≈ 0.6 MK (quiet corona), 94 Å ≈ 6.3 MK, 131 Å ≈ 10 MK (hot flare loops). Watching multiple bands improves flare timing.","euv,temperature,flare"
+4,ssn,NOAA,"Higher sunspot number (SSN) correlates with more frequent flares and CMEs; rates rise toward solar maximum and fall toward minimum.","cycle,frequency,ssn"
+5,cme,General,"CME arrivals can trigger geomagnetic storms and geomagnetically induced currents; forecasts consider CME speed, direction, and magnetic orientation.","cme,storm,grid"
+6,sat_safe_mode,Ops,"Satellites often enter Safe Mode during severe space weather to protect instruments and stabilize attitude until conditions improve.","satellite,operations,safe_mode"
+7,radio,NOAA,"Strong X-ray flares can cause dayside HF radio blackouts; operational alerts classify impacts on an R-scale (R1–R5).","radio,blackout,flare"
+8,gnss,Ionosphere,"Geomagnetic storms increase ionospheric irregularities and scintillation, which can raise GNSS positioning error and loss-of-lock events.","gnss,ionosphere,storm"

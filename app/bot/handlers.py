@@ -3,14 +3,14 @@ from telegram.ext import CommandHandler, MessageHandler, ConversationHandler, Co
 from .state import S
 from .keyboards import two_buttons
 
+# story engine
+from ..story.engine import StoryState, render_node, advance
+
 ABOUT_TEXT = (
-    "Chillguy Space Bot — минимальный прототип с кнопками.\\n"
-    "/start — спросить имя, показать две кнопки\\n"
+    "Chillguy Space Bot — история с развилками и RAG.\n"
+    "/start — спросить имя и начать историю\n"
     "/about — краткая справка"
 )
-
-BUTTON_1 = "button-1"
-BUTTON_2 = "button-2"
 
 async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привет! Как тебя зовут?")
@@ -19,27 +19,49 @@ async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 async def about(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(ABOUT_TEXT)
 
+async def _send_node(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    # Рендер текущего узла, показать две кнопки
+    state: StoryState = ctx.user_data["state"]
+    text, labels, ending = render_node(state)
+    ctx.user_data["labels"] = labels
+    kb = two_buttons(labels["button_1"], labels["button_2"])
+    await update.message.reply_text(text, reply_markup=kb)
+    return ending is not None
+
 async def capture_name(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     name = (update.message.text or "Гость").strip()
-    ctx.user_data["name"] = name
-    kb = two_buttons(BUTTON_1, BUTTON_2)
-    await update.message.reply_text(
-        f"Приятно познакомиться, {name}! Нажми одну из кнопок ниже:",
-        reply_markup=kb
-    )
+    ctx.user_data["state"] = StoryState(name=name, node_id="flare_alert")
+    finished = await _send_node(update, ctx)
+    if finished:
+        return ConversationHandler.END
     return S.STORY
 
-async def on_button(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
-    choice = (update.message.text or "").strip().lower()
-    if BUTTON_1 in choice:
-        msg = "Ты нажал(а) button-1. (Пока просто проверка UI)"
-    elif BUTTON_2 in choice:
-        msg = "Ты нажал(а) button-2. (Пока просто проверка UI)"
-    else:
-        msg = "Пожалуйста, нажми одну из кнопок: button-1 или button-2."
+def _map_press_to_key(pressed: str, labels: dict) -> str | None:
+    p = (pressed or "").strip().lower()
+    if p == (labels["button_1"] or "").lower() or "1" in p:
+        return "button_1"
+    if p == (labels["button_2"] or "").lower() or "2" in p:
+        return "button_2"
+    return None
 
-    kb = two_buttons(BUTTON_1, BUTTON_2)
-    await update.message.reply_text(msg, reply_markup=kb)
+async def on_button(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    # Восстановим состояние пользователя
+    if "state" not in ctx.user_data:
+        return await start(update, ctx)
+
+    labels = ctx.user_data.get("labels", {"button_1":"button-1","button_2":"button-2"})
+    key = _map_press_to_key(update.message.text, labels)
+    if key is None:
+        kb = two_buttons(labels["button_1"], labels["button_2"])
+        await update.message.reply_text("Нажми одну из двух кнопок.", reply_markup=kb)
+        return S.STORY
+
+    # Переходим по ветке
+    advance(ctx.user_data["state"], key)
+    finished = await _send_node(update, ctx)
+    if finished:
+        # финальный узел — завершаем диалог
+        return ConversationHandler.END
     return S.STORY
 
 def build_conversation(application):

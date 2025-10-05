@@ -1,17 +1,48 @@
-﻿title: 'Chillguy: Stellar Stories'
+﻿title: 'Chillguy: Tales of Solar Weather'
 buttons:
-  button_1: 'Button 1'
-  button_2: 'Button 2'
+  button_1: 'Инициировать Safe Mode'
+  button_2: 'Продолжать работу'
 nodes:
   - id: flare_alert
+    query: "solar flare x-ray 1-8 Å M5 GOES satellite"
     text: |
-      {{name}}, тестовый узел. Здесь будет история.
+      {name}, на твою орбитальную станцию приходит тревога:
+      всплеск рентгеновского излучения (возможен M5). Что делаем?
+      {rag_snippets}
+    choices:
+      button_1:
+        label_override: "Safe Mode"
+        next: safe_mode_path
+      button_2:
+        label_override: "Игнорировать"
+        next: ignore_path
+
+  - id: safe_mode_path
+    query: "satellite safe mode operations"
+    text: |
+      Ты включаешь Safe Mode — панели и научные приборы в безопасном положении.
+      Станция стабилизируется и ждёт окончания всплеска.
+      {rag_snippets}
     choices:
       button_1: { next: good_ending }
+      button_2: { next: good_ending }
+
+  - id: ignore_path
+    query: "radio blackout gnss storm flare consequences"
+    text: |
+      Игнор стоил дорого: перезагрузки подсистем, аномалии ориентации.
+      Связь дергается, пакет телеметрии утерян.
+      {rag_snippets}
+    choices:
+      button_1: { next: bad_ending }
       button_2: { next: bad_ending }
+
   - id: good_ending
     ending: good
-    text: 'Good end.'
+    text: |
+      Финал (good): станция сохранила ресурс и данные. Команда благодарит тебя.
+
   - id: bad_ending
     ending: bad
-    text: 'Bad end.'
+    text: |
+      Финал (bad): потери данных и внеплановое обслуживание. Урок усвоен.
